@@ -1,1 +1,433 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Master Quiz 🚀</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti cho hiệu ứng chiến thắng -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
 
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 35px 30px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        /* Header & Progress */
+        .quiz-header {
+            margin-bottom: 25px;
+        }
+
+        .quiz-header h1 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge {
+            background: #e2e8f0;
+            color: #4a5568;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #edf2f7;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4299e1, #667eea);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        /* Question Section */
+        .question-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Options */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 20px;
+            font-size: 16px;
+            color: #2d3748;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: #667eea;
+            background: #ebf8ff;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background-color: #c6f6d5 !important;
+            border-color: #38a169 !important;
+            color: #22543d !important;
+        }
+
+        .option-btn.wrong {
+            background-color: #fed7d7 !important;
+            border-color: #e53e3e !important;
+            color: #742a2a !important;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* Explanation Box */
+        .explanation-box {
+            background: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+            color: #2b6cb0;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Footer Controls */
+        .quiz-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-next:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Result Screen */
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .score-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .feedback-text {
+            font-size: 16px;
+            color: #718096;
+            margin-bottom: 25px;
+        }
+
+        .btn-restart {
+            background: #38a169;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-restart:hover {
+            background: #2f855a;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-card">
+        <!-- Quiz Screen -->
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <h1>
+                    <span>English Master 🌟</span>
+                    <span class="badge" id="question-counter">Câu 1/5</span>
+                </h1>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+
+            <div class="question-title" id="question-text">Đang tải câu hỏi...</div>
+
+            <div class="options-grid" id="options-container">
+                <!-- Các lựa chọn sẽ tự động tạo từ JS -->
+            </div>
+
+            <div class="explanation-box" id="explanation-box">
+                <strong>💡 Giải thích:</strong> <span id="explanation-text"></span>
+            </div>
+
+            <div class="quiz-footer">
+                <button class="btn-next" id="next-btn" onclick="nextQuestion()" disabled>Câu tiếp theo ➔</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="result-screen">
+            <div class="result-icon" id="result-icon">🎉</div>
+            <h2>Hoàn thành bài trắc nghiệm!</h2>
+            <div class="score-text" id="score-text">Bạn đạt 0/5 điểm</div>
+            <p class="feedback-text" id="feedback-text">Hãy tiếp tục cố gắng nhé!</p>
+            <button class="btn-restart" onclick="restartQuiz()">Làm lại bài thi 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // Danh sách câu hỏi (Bạn có thể thêm/sửa câu hỏi dễ dàng ở đây)
+        const quizData = [
+            {
+                question: "1. She ______ to the library every Saturday morning.",
+                options: ["go", "goes", "going", "gone"],
+                correct: 1,
+                explanation: "Chủ ngữ là 'She' (số ít) ở thì Hiện tại đơn (Every Saturday), động từ 'go' phải thêm '-es' thành 'goes'."
+            },
+            {
+                question: "2. What is the synonym (từ đồng nghĩa) of 'METICULOUS'?",
+                options: ["Careless", "Careful & Precise", "Lazy", "Quick"],
+                correct: 1,
+                explanation: "'Meticulous' có nghĩa là tỉ mỉ, kỹ lưỡng = 'Careful & Precise'."
+            },
+            {
+                question: "3. If I ______ you, I would accept that job offer immediately.",
+                options: ["am", "was", "were", "have been"],
+                correct: 2,
+                explanation: "Đây là câu điều kiện loại 2 (giả định không có thật ở hiện tại). Động từ 'to be' dùng 'were' cho tất cả các ngôi."
+            },
+            {
+                question: "4. Choose the word with the CORRECT spelling:",
+                options: ["Accommodate", "Acommodate", "Accomodate", "Acomodate"],
+                correct: 0,
+                explanation: "Từ đúng chính tả là 'Accommodate' (chứa 2 chữ 'c' và 2 chữ 'm')."
+            },
+            {
+                question: "5. He is fully capable ______ handling this project alone.",
+                options: ["in", "at", "of", "with"],
+                correct: 2,
+                explanation: "Cấu trúc cố định: 'Be capable of + V-ing/N' (có khả năng làm gì)."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOption = null;
+
+        // Elements
+        const questionText = document.getElementById("question-text");
+        const optionsContainer = document.getElementById("options-container");
+        const questionCounter = document.getElementById("question-counter");
+        const progressBar = document.getElementById("progress-bar");
+        const nextBtn = document.getElementById("next-btn");
+        const explanationBox = document.getElementById("explanation-box");
+        const explanationText = document.getElementById("explanation-text");
+
+        const quizScreen = document.getElementById("quiz-screen");
+        const resultScreen = document.getElementById("result-screen");
+        const scoreText = document.getElementById("score-text");
+        const feedbackText = document.getElementById("feedback-text");
+        const resultIcon = document.getElementById("result-icon");
+
+        // Khởi chạy bài trắc nghiệm
+        function loadQuestion() {
+            selectedOption = null;
+            nextBtn.disabled = true;
+            explanationBox.style.display = "none";
+
+            const data = quizData[currentQuestion];
+            
+            // Cập nhật Header
+            questionCounter.innerText = `Câu ${currentQuestion + 1}/${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+            questionText.innerText = data.question;
+
+            // Xóa câu trả lời cũ
+            optionsContainer.innerHTML = "";
+
+            // Tạo danh sách câu trả lời
+            data.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.classList.add("option-btn");
+                button.innerHTML = `<span>${String.fromCharCode(65 + index)}. ${option}</span>`;
+                button.onclick = () => selectOption(index);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // Xử lý khi chọn câu trả lời
+        function selectOption(index) {
+            if (selectedOption !== null) return; // Không cho chọn lại khi đã chọn
+
+            selectedOption = index;
+            const data = quizData[currentQuestion];
+            const buttons = optionsContainer.querySelectorAll(".option-btn");
+
+            buttons.forEach(btn => btn.disabled = true); // Khóa tất cả các nút
+
+            if (index === data.correct) {
+                buttons[index].classList.add("correct");
+                buttons[index].innerHTML += " <span>✅</span>";
+                score++;
+            } else {
+                buttons[index].classList.add("wrong");
+                buttons[index].innerHTML += " <span>❌</span>";
+                // Hiển thị đáp án đúng
+                buttons[data.correct].classList.add("correct");
+                buttons[data.correct].innerHTML += " <span>✅</span>";
+            }
+
+            // Hiển thị giải thích
+            explanationText.innerText = data.explanation;
+            explanationBox.style.display = "block";
+
+            // Kích hoạt nút Tiếp theo
+            nextBtn.disabled = false;
+        }
+
+        // Chuyển sang câu hỏi tiếp theo
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Hiển thị kết quả
+        function showResults() {
+            progressBar.style.width = "100%";
+            quizScreen.style.display = "none";
+            resultScreen.style.display = "block";
+
+            scoreText.innerText = `Bạn đạt ${score}/${quizData.length} điểm!`;
+
+            const percentage = (score / quizData.length) * 100;
+
+            if (percentage === 100) {
+                resultIcon.innerText = "🏆";
+                feedbackText.innerText = "Xuất sắc! Bạn đã trả lời đúng tất cả các câu hỏi!";
+                fireConfetti();
+            } else if (percentage >= 60) {
+                resultIcon.innerText = "🌟";
+                feedbackText.innerText = "Làm tốt lắm! Bạn có vốn tiếng Anh rất vững!";
+            } else {
+                resultIcon.innerText = "📚";
+                feedbackText.innerText = "Đừng nản lòng! Hãy ôn lại kiến thức và thử lại nhé!";
+            }
+        }
+
+        // Hiệu ứng Pháo hoa ăn mừng
+        function fireConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        // Khởi động lại
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            resultScreen.style.display = "none";
+            quizScreen.style.display = "block";
+            loadQuestion();
+        }
+
+        // Tải câu hỏi đầu tiên khi vào trang
+        loadQuestion();
+    </script>
+</body>
+</html>
